@@ -1,73 +1,19 @@
-import {  createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase/firebase.config";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth"
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-const AuthContext =  createContext();
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_Auth_Domain,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDERID,
+  appId: import.meta.env.VITE_APPID
+};
 
-export const useAuth = () => {
-    return useContext(AuthContext)
-}
-
-const googleProvider = new GoogleAuthProvider();
-
-// authProvider
-export const AuthProvide = ({children}) => {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    // register a user
-    const registerUser = async (email,password) => {
-
-        return await createUserWithEmailAndPassword(auth, email, password);
-    }
-
-    // login the user
-    const loginUser = async (email, password) => {
-    
-        return await signInWithEmailAndPassword(auth, email, password)
-    }
-
-    // sing up with google
-    const signInWithGoogle = async () => {
-     
-        return await signInWithPopup(auth, googleProvider)
-    }
-
-    // logout the user
-    const logout = () => {
-        return signOut(auth)
-    }
-
-    // manage user
-    useEffect(() => {
-        const unsubscribe =  onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user);
-            setLoading(false);
-
-            if(user) {
-               
-                const {email, displayName, photoURL} = user;
-                const userData = {
-                    email, username: displayName, photo: photoURL
-                } 
-            }
-        })
-
-        return () => unsubscribe();
-    }, [])
-
-
-    const value = {
-        currentUser,
-        loading,
-        registerUser,
-        loginUser,
-        signInWithGoogle,
-        logout
-    }
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    )
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+export const auth =  getAuth(app);
